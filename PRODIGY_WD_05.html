@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylish Weather App</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <!-- CSS Styles -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #6dd5ed, #2193b0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        #weather {
+            font-size: 1.2rem;
+        }
+        .loading {
+            font-size: 1.5rem;
+            margin: 20px;
+        }
+        .weather-info {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        .icon {
+            width: 100px;
+        }
+        /* Animation */
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .fade-in {
+            animation: fadeIn 2s ease-in-out;
+        }
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .icon {
+                width: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container fade-in">
+        <h1>Weather App</h1>
+        <div id="weather">
+            <p class="loading">Fetching weather data...</p>
+        </div>
+    </div>
+
+    <script>
+        // Your OpenWeatherMap API key
+        const apiKey = 'a4c573c4e523270eccf3758b71dc856e'; // Replace 'YOUR_API_KEY' with your actual API key
+
+        // Function to fetch and display weather data
+        function getWeather(lat, lon) {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const weatherDiv = document.getElementById('weather');
+                    const weatherIcon = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
+                    
+                    weatherDiv.innerHTML = `
+                        <img class="icon" src="${weatherIcon}" alt="Weather Icon">
+                        <div class="weather-info"><strong>Location:</strong> ${data.name}</div>
+                        <div class="weather-info"><strong>Temperature:</strong> ${data.main.temp}°C</div>
+                        <div class="weather-info"><strong>Weather:</strong> ${data.weather[0].description}</div>
+                        <div class="weather-info"><strong>Humidity:</strong> ${data.main.humidity}%</div>
+                        <div class="weather-info"><strong>Wind Speed:</strong> ${data.wind.speed} m/s</div>
+                    `;
+                })
+                .catch(error => {
+                    document.getElementById('weather').innerHTML = '<p class="loading">Unable to fetch weather data. Please try again later.</p>';
+                });
+        }
+
+        // Function to get the user's location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        getWeather(latitude, longitude);
+                    },
+                    (error) => {
+                        document.getElementById('weather').innerHTML = '<p class="loading">Unable to retrieve location. Please allow location access.</p>';
+                    }
+                );
+            } else {
+                document.getElementById('weather').innerHTML = '<p class="loading">Geolocation is not supported by this browser.</p>';
+            }
+        }
+
+        // Get the user's location when the page loads
+        window.onload = getLocation;
+    </script>
+</body>
+</html>
